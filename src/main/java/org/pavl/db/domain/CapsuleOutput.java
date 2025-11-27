@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,6 +40,7 @@ public class CapsuleOutput {
         if (unlockAt.isAfter(LocalDate.now())) {
             Period timeLeft = Period.between(LocalDate.now(), unlockAt);
             if (timeLeft.getYears() == 0) {
+                long daysUntilUnlock = ChronoUnit.DAYS.between(LocalDate.now(), unlockAt);
                 return String.format(
                         """
                         Created: %tb %te, %tY
@@ -47,26 +49,42 @@ public class CapsuleOutput {
                         createdAt,
                         createdAt,
                         createdAt,
-                        timeLeft.getDays(),
+                        daysUntilUnlock,
                         unlockAt,
                         unlockAt,
                         unlockAt
                 );
             }else {
-                return String.format(
-                        """
-                        Created: %tb %te, %tY
-                        Unlocks in %d year, %d months (%tb %te, %tY)
-                        """,
-                        createdAt,
-                        createdAt,
-                        createdAt,
-                        timeLeft.getYears(),
-                        timeLeft.getMonths(),
-                        unlockAt,
-                        unlockAt,
-                        unlockAt
-                );
+                if (timeLeft.getMonths() != 0) {
+                    return String.format(
+                            """
+                                    Created: %tb %te, %tY
+                                    Unlocks in %d year, %d months (%tb %te, %tY)
+                                    """,
+                            createdAt,
+                            createdAt,
+                            createdAt,
+                            timeLeft.getYears(),
+                            timeLeft.getMonths(),
+                            unlockAt,
+                            unlockAt,
+                            unlockAt
+                    );
+                }else {
+                    return String.format(
+                            """
+                                    Created: %tb %te, %tY
+                                    Unlocks in %d years (%tb %te, %tY)
+                                    """,
+                            createdAt,
+                            createdAt,
+                            createdAt,
+                            timeLeft.getYears(),
+                            unlockAt,
+                            unlockAt,
+                            unlockAt
+                    );
+                }
             }
         }else {
             return String.format(
